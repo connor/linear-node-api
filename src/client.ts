@@ -35,11 +35,6 @@ class ClientError extends Error {
 
     this.response = response;
     this.request = request;
-
-    // this is needed as Safari doesn't support .captureStackTrace
-    if (typeof Error.captureStackTrace === "function") {
-      Error.captureStackTrace(this, ClientError);
-    }
   }
 
   private static extractMessage(response: GraphQLResponse): string {
@@ -66,6 +61,9 @@ export class LinearClient {
       query,
       variables: variables ? variables : undefined
     });
+
+    console.log(body)
+    print(body)
 
     const response = await fetch("https://api.linear.app/graphql", {
       method: "POST",

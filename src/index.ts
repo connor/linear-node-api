@@ -2,10 +2,7 @@ import { LinearClient } from "./client";
 
 interface Team {
   id: string;
-  issueLabels: Array<{
-    id: string;
-    name: string;
-  }>;
+  name: string;
   organization: {
     users: Array<{
       id: string;
@@ -25,7 +22,7 @@ interface Team {
 interface NewIssue {
   title: string;
   description?: string;
-  label?: string;
+  label_ids?: [string];
   assignee?: string;
   state?: string;
   project?: string;
@@ -33,77 +30,14 @@ interface NewIssue {
 
 export class Linear {
   private client: LinearClient;
-  private team: string;
+  private team_id: string;
 
-  constructor(apiKey: string, team: string) {
+  constructor(apiKey: string, team_id: string) {
     this.client = new LinearClient(apiKey);
-    this.team = team;
-  }
-
-  private async getTeam() {
-    const response = await this.client.request(
-      `
-            query getTeam($team: String!) {
-                team(id: $team) {
-                    id
-                    issueLabels {
-                        id
-                        name
-                    }
-                    organization {
-                        users {
-                            id
-                            displayName
-                        }
-                    }
-                    states {
-                        id
-                        name
-                    }
-                    projects {
-                        id
-                        name
-                        archivedAt
-                    }
-                }
-            }
-        `,
-      { team: this.team }
-    );
-
-    return response.team as Team;
+    this.team_id = team_id;
   }
 
   public async createIssue(issue: NewIssue) {
-    const team = await this.getTeam();
-
-    const assignee = issue.assignee
-      ? team.organization.users.find((u: any) => {
-          return u.displayName.toLowerCase() == issue.assignee.toLowerCase();
-        })
-      : null;
-
-    const label = issue.label
-      ? team.issueLabels.find((l: any) => {
-          return l.name.toLowerCase() == issue.label.toLowerCase();
-        })
-      : null;
-
-    const state = issue.state
-      ? team.states.find((s: any) => {
-          return s.name.toLowerCase() == issue.state.toLowerCase();
-        })
-      : null;
-
-    const project = issue.project
-      ? team.projects.find((p: any) => {
-          return (
-            p.archivedAt == null &&
-            p.name.toLowerCase() == issue.project.toLowerCase()
-          );
-        })
-      : null;
-
     await this.client.request(
       `mutation createIssue(
             $teamId: String!, 
@@ -130,13 +64,13 @@ export class Linear {
         }
         `,
       {
-        teamId: team.id,
+        teamId: this.team_id,
         title: issue.title,
         description: issue.description,
-        labelIds: label ? [label.id] : [],
-        assigneeId: assignee ? assignee.id : null,
-        stateId: state ? state.id : null,
-        projectId: project ? project.id : null
+        labelIds: issue.label_ids,
+        assigneeId: null,
+        stateId: null,
+        projectId: null
       }
     );
   }
