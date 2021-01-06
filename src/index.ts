@@ -22,7 +22,7 @@ interface Team {
 interface NewIssue {
   title: string;
   description?: string;
-  label_ids?: [string];
+  label_ids?: string[];
   assignee?: string;
   state?: string;
   project?: string;
