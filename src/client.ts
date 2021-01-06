@@ -62,9 +62,6 @@ export class LinearClient {
       variables: variables ? variables : undefined
     });
 
-    console.log(body)
-    print(body)
-
     const response = await fetch("https://api.linear.app/graphql", {
       method: "POST",
       headers: {
