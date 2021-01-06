@@ -14,10 +14,7 @@ const linear = new Linear(
 
 await linear.createIssue({
   title: "Issue title",
-  description: "Optional description",
-  label: "bug",
-  assignee: "emil",
-  state: "todo",
-  project: "My Project"
+  description: "Optional description; markdown supported. Make sure any images appear first!",
+  label_ids: ["1234"]
 });
 ```
